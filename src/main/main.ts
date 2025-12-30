@@ -77,7 +77,7 @@ function createTray(): void {
     },
   ]);
 
-  tray.setToolTip('Camera Bubble');
+  tray.setToolTip('My Bubble Camera');
   tray.setContextMenu(contextMenu);
 }
 

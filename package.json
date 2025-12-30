@@ -1,10 +1,14 @@
 {
-  "name": "camera-bubble",
+  "name": "my-bubble-camera",
   "version": "1.0.0",
   "description": "A floating camera overlay for screen recording - show your face while recording your screen",
   "main": "dist/main/main.js",
-  "author": "Your Name",
+  "author": "Artur Ceschin <artur.ceschin@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arturceschin/my-bubble-camera.git"
+  },
   "scripts": {
     "start": "npm run build && electron .",
     "dev": "concurrently \"npm run watch\" \"npm run electron:dev\"",
@@ -19,13 +23,20 @@
     "package:mac": "npm run build && electron-builder --mac",
     "package:win": "npm run build && electron-builder --win",
     "package:linux": "npm run build && electron-builder --linux",
+    "package:all": "npm run build && electron-builder --mac --win --linux",
+    "release": "npm run build && electron-builder --publish always",
+    "release:mac": "npm run build && electron-builder --mac --publish always",
+    "release:win": "npm run build && electron-builder --win --publish always",
+    "release:linux": "npm run build && electron-builder --linux --publish always",
     "prepare": "husky"
   },
   "build": {
-    "appId": "com.camerabubble.app",
-    "productName": "Camera Bubble",
+    "appId": "com.mybubblecamera.app",
+    "productName": "My Bubble Camera",
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "directories": {
-      "output": "release"
+      "output": "release",
+      "buildResources": "assets"
     },
     "files": [
       "dist/**/*",
@@ -33,14 +44,82 @@
     ],
     "mac": {
       "category": "public.app-category.utilities",
-      "icon": "assets/icon.icns"
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "assets/entitlements.mac.plist",
+      "entitlementsInherit": "assets/entitlements.mac.plist"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     },
     "win": {
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "installerHeaderIcon": "assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
     },
     "linux": {
       "icon": "assets/icon.png",
-      "category": "Utility"
+      "category": "Utility",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        }
+      ],
+      "maintainer": "Artur Ceschin artur.ceschin@gmail.com",
+      "synopsis": "Floating camera overlay for screen recording",
+      "description": "A floating camera bubble that displays your webcam feed on top of other windows. Perfect for screen recording and streaming."
+    },
+    "publish": {
+      "provider": "github",
+      "releaseType": "release"
     }
   },
   "lint-staged": {

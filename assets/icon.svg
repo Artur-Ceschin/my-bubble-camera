@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Claude-inspired warm gradient -->
+    <linearGradient id="warmGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E8DDD4"/>
+      <stop offset="100%" style="stop-color:#F5EDE6"/>
+    </linearGradient>
+    
+    <!-- Terracotta accent gradient -->
+    <linearGradient id="terracotta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D97757"/>
+      <stop offset="100%" style="stop-color:#C4623F"/>
+    </linearGradient>
+    
+    <!-- Subtle shadow -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#8B5A3C" flood-opacity="0.15"/>
+    </filter>
+    
+    <!-- Inner glow -->
+    <filter id="innerGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle - warm cream -->
+  <circle cx="256" cy="256" r="240" fill="url(#warmGrad)" filter="url(#softShadow)"/>
+  
+  <!-- Outer ring - terracotta -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#terracotta)" stroke-width="12" opacity="0.9"/>
+  
+  <!-- Camera bubble body -->
+  <circle cx="256" cy="256" r="140" fill="url(#terracotta)" filter="url(#softShadow)"/>
+  
+  <!-- Inner circle - cream -->
+  <circle cx="256" cy="256" r="100" fill="#F5EDE6"/>
+  
+  <!-- Lens aperture -->
+  <circle cx="256" cy="256" r="70" fill="#E8DDD4"/>
+  <circle cx="256" cy="256" r="50" fill="url(#terracotta)" opacity="0.85"/>
+  <circle cx="256" cy="256" r="30" fill="#2D2926"/>
+  
+  <!-- Lens reflection - minimalist -->
+  <ellipse cx="240" cy="240" rx="12" ry="8" fill="rgba(255,255,255,0.6)" transform="rotate(-45 240 240)"/>
+  <circle cx="268" cy="268" r="4" fill="rgba(255,255,255,0.4)"/>
+  
+  <!-- Recording indicator - subtle -->
+  <circle cx="340" cy="175" r="18" fill="#D97757" opacity="0.9"/>
+  <circle cx="340" cy="175" r="8" fill="#F5EDE6"/>
+  
+  <!-- Decorative arc -->
+  <path d="M 160 320 Q 256 380 352 320" fill="none" stroke="#D97757" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
+</svg>
