@@ -35,6 +35,36 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install ImageMagick (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Install ImageMagick (macOS)
+        if: runner.os == 'macOS'
+        run: brew install imagemagick
+
+      - name: Install ImageMagick (Windows)
+        if: runner.os == 'Windows'
+        run: choco install imagemagick -y
+
+      - name: Generate icons (macOS)
+        if: matrix.platform == 'mac'
+        run: |
+          chmod +x ./scripts/generate-icons.sh
+          ./scripts/generate-icons.sh
+
+      - name: Generate icons (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          magick assets/icon.svg -resize 512x512 assets/icon.png
+
+      - name: Generate icons (Windows)
+        if: matrix.platform == 'win'
+        shell: bash
+        run: |
+          magick assets/icon.svg -resize 256x256 assets/icon.png
+          magick assets/icon.svg -resize 256x256 -define icon:auto-resize=256,128,64,48,32,16 assets/icon.ico
+
       - name: Install dependencies
         run: npm ci
 
