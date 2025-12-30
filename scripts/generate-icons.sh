@@ -8,24 +8,31 @@ SVG_FILE="$ASSETS_DIR/icon.svg"
 
 echo "🎨 Generating app icons..."
 
-# Check if ImageMagick is installed
+# Determine ImageMagick command (magick for v7+, convert for v6)
+MAGICK_CMD=""
 if command -v magick &> /dev/null; then
-    echo "Using ImageMagick..."
+    MAGICK_CMD="magick"
+elif command -v convert &> /dev/null; then
+    MAGICK_CMD="convert"
+fi
+
+if [ -n "$MAGICK_CMD" ]; then
+    echo "Using ImageMagick ($MAGICK_CMD)..."
     
     # Generate PNG for Linux (512x512)
-    magick "$SVG_FILE" -resize 512x512 "$ASSETS_DIR/icon.png"
+    $MAGICK_CMD "$SVG_FILE" -resize 512x512 "$ASSETS_DIR/icon.png"
     echo "✅ Generated icon.png (Linux)"
     
     # Generate ICO for Windows (multiple sizes)
-    magick "$SVG_FILE" -resize 256x256 -define icon:auto-resize=256,128,64,48,32,16 "$ASSETS_DIR/icon.ico"
+    $MAGICK_CMD "$SVG_FILE" -resize 256x256 -define icon:auto-resize=256,128,64,48,32,16 "$ASSETS_DIR/icon.ico"
     echo "✅ Generated icon.ico (Windows)"
     
     # Generate ICNS for macOS
     mkdir -p "$ASSETS_DIR/icon.iconset"
     for size in 16 32 64 128 256 512; do
-        magick "$SVG_FILE" -resize ${size}x${size} "$ASSETS_DIR/icon.iconset/icon_${size}x${size}.png"
+        $MAGICK_CMD "$SVG_FILE" -resize ${size}x${size} "$ASSETS_DIR/icon.iconset/icon_${size}x${size}.png"
         if [ $size -le 256 ]; then
-            magick "$SVG_FILE" -resize $((size*2))x$((size*2)) "$ASSETS_DIR/icon.iconset/icon_${size}x${size}@2x.png"
+            $MAGICK_CMD "$SVG_FILE" -resize $((size*2))x$((size*2)) "$ASSETS_DIR/icon.iconset/icon_${size}x${size}@2x.png"
         fi
     done
     
@@ -62,4 +69,3 @@ echo "🎉 Icon generation complete!"
 echo ""
 echo "Generated files:"
 ls -la "$ASSETS_DIR"/icon.* 2>/dev/null
-
