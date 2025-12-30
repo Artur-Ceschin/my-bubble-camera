@@ -18,19 +18,44 @@ A beautiful, open-source floating camera overlay for screen recording. Show your
 - **Keyboard Shortcuts** - Quick access to all features
 - **Cross-Platform** - Works on macOS, Windows, and Linux
 
-## 📦 Download
+## 📦 Download & Install
 
-Download the latest release for your platform:
+### [⬇️ Download Latest Release](https://github.com/Artur-Ceschin/my-bubble-camera/releases/latest)
 
-| Platform | Download |
-|----------|----------|
-| **macOS (Apple Silicon)** | [My-Bubble-Camera-x.x.x-mac-arm64.dmg](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
-| **macOS (Intel)** | [My-Bubble-Camera-x.x.x-mac-x64.dmg](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
-| **Windows (Installer)** | [My-Bubble-Camera-x.x.x-win-x64.exe](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
-| **Windows (Portable)** | [My-Bubble-Camera-x.x.x-win-x64-portable.exe](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
-| **Linux (AppImage)** | [My-Bubble-Camera-x.x.x-linux-x64.AppImage](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
-| **Linux (Debian/Ubuntu)** | [my-bubble-camera_x.x.x_amd64.deb](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
-| **Linux (Fedora/RHEL)** | [my-bubble-camera-x.x.x.x86_64.rpm](https://github.com/arturceschin/my-bubble-camera/releases/latest) |
+| Platform | File | Install Instructions |
+|----------|------|---------------------|
+| **macOS (Apple Silicon)** | `.dmg` | Open DMG → Drag to Applications |
+| **macOS (Intel)** | `.dmg` | Open DMG → Drag to Applications |
+| **Windows** | `.exe` | Run installer → Follow prompts |
+| **Windows (Portable)** | `portable.exe` | Just run it, no install needed |
+| **Linux (Universal)** | `.AppImage` | `chmod +x *.AppImage` → Run it |
+| **Linux (Debian/Ubuntu)** | `.deb` | `sudo dpkg -i *.deb` |
+| **Linux (Fedora/RHEL)** | `.rpm` | `sudo rpm -i *.rpm` |
+
+### Quick Install Commands
+
+**macOS** (after downloading .dmg):
+```bash
+# Open the DMG and drag to Applications, or:
+open ~/Downloads/My-Bubble-Camera*.dmg
+```
+
+**Ubuntu/Debian**:
+```bash
+# Download and install
+wget https://github.com/Artur-Ceschin/my-bubble-camera/releases/latest/download/my-bubble-camera_1.0.0_amd64.deb
+sudo dpkg -i my-bubble-camera_1.0.0_amd64.deb
+```
+
+**Linux AppImage**:
+```bash
+# Download, make executable, and run
+wget https://github.com/Artur-Ceschin/my-bubble-camera/releases/latest/download/My-Bubble-Camera-1.0.0-linux-x64.AppImage
+chmod +x My-Bubble-Camera-1.0.0-linux-x64.AppImage
+./My-Bubble-Camera-1.0.0-linux-x64.AppImage
+```
+
+> **Note**: On macOS, you may need to right-click → Open the first time to bypass Gatekeeper.
 
 ## 🚀 Getting Started (Development)
 
