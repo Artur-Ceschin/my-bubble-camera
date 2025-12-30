@@ -44,8 +44,8 @@ async function initCamera() {
   try {
     await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
     const devices = await navigator.mediaDevices.enumerateDevices();
-    availableCameras = devices.filter(device => device.kind === 'videoinput');
-    
+    availableCameras = devices.filter((device) => device.kind === 'videoinput');
+
     if (availableCameras.length === 0) {
       showNoCamera();
       return;
@@ -67,16 +67,16 @@ async function selectCamera(index) {
 
 async function startCamera(deviceId = null) {
   if (mediaStream) {
-    mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream.getTracks().forEach((track) => track.stop());
   }
 
   const constraints = {
     video: {
       width: { ideal: 640 },
       height: { ideal: 640 },
-      facingMode: 'user'
+      facingMode: 'user',
     },
-    audio: false
+    audio: false,
   };
 
   if (deviceId) {
@@ -123,14 +123,14 @@ function setBorderTheme(theme) {
 // Calculate border-radius based on aspect ratio
 function calculateBorderRadius(width, height) {
   const aspectRatio = width / height;
-  
+
   const squareness = 1 - Math.abs(1 - aspectRatio) * 0.5;
-  
+
   const maxRadiusPercent = 50;
   const minRadiusPercent = 5;
-  
+
   const radiusPercent = minRadiusPercent + (maxRadiusPercent - minRadiusPercent) * squareness;
-  
+
   return `${radiusPercent}%`;
 }
 
@@ -139,10 +139,10 @@ function updateBubbleSize(width, height, animate = false) {
   // Ensure valid integers
   bubbleWidth = Math.round(Math.max(MIN_SIZE, Math.min(MAX_SIZE, width || MIN_SIZE)));
   bubbleHeight = Math.round(Math.max(MIN_SIZE, Math.min(MAX_SIZE, height || MIN_SIZE)));
-  
+
   // Clear shape preset when manually resizing (enables auto border-radius)
   currentShapePreset = null;
-  
+
   applyBubbleStyles(animate);
 }
 
@@ -150,53 +150,58 @@ function updateBubbleSize(width, height, animate = false) {
 function updateBubbleSizeNoPresetClear(width, height) {
   bubbleWidth = width;
   bubbleHeight = height;
-  
+
   if (currentShapePreset === null) {
     const borderRadius = calculateBorderRadius(bubbleWidth, bubbleHeight);
     cameraContainer.style.borderRadius = borderRadius;
   }
-  
+
   cameraContainer.style.transition = 'none';
   cameraContainer.style.width = `${bubbleWidth}px`;
   cameraContainer.style.height = `${bubbleHeight}px`;
-  
+
   // Update window size to match
-  ipcRenderer.send('resize-window', { 
-    width: bubbleWidth + 20, 
-    height: bubbleHeight + 20 
+  ipcRenderer.send('resize-window', {
+    width: bubbleWidth + 20,
+    height: bubbleHeight + 20,
   });
 }
 
 // Apply bubble styles
 function applyBubbleStyles(animate = false) {
-  const borderRadius = currentShapePreset === null 
-    ? calculateBorderRadius(bubbleWidth, bubbleHeight)
-    : getBorderRadiusForPreset(currentShapePreset);
-  
+  const borderRadius =
+    currentShapePreset === null
+      ? calculateBorderRadius(bubbleWidth, bubbleHeight)
+      : getBorderRadiusForPreset(currentShapePreset);
+
   if (animate) {
     cameraContainer.style.transition = 'width 0.2s ease, height 0.2s ease, border-radius 0.2s ease';
   } else {
     cameraContainer.style.transition = 'none';
   }
-  
+
   cameraContainer.style.width = `${bubbleWidth}px`;
   cameraContainer.style.height = `${bubbleHeight}px`;
   cameraContainer.style.borderRadius = borderRadius;
-  
+
   // Update window size to match
-  ipcRenderer.send('resize-window', { 
-    width: bubbleWidth + 20, 
-    height: bubbleHeight + 20 
+  ipcRenderer.send('resize-window', {
+    width: bubbleWidth + 20,
+    height: bubbleHeight + 20,
   });
 }
 
 // Get border radius for preset
 function getBorderRadiusForPreset(preset) {
   switch (preset) {
-    case 'circle': return '50%';
-    case 'rounded': return '20px';
-    case 'rectangle': return '8px';
-    default: return calculateBorderRadius(bubbleWidth, bubbleHeight);
+    case 'circle':
+      return '50%';
+    case 'rounded':
+      return '20px';
+    case 'rectangle':
+      return '8px';
+    default:
+      return calculateBorderRadius(bubbleWidth, bubbleHeight);
   }
 }
 
@@ -206,38 +211,38 @@ function getResizeEdge(e) {
   const y = e.clientY - rect.top;
   const width = rect.width;
   const height = rect.height;
-  
+
   const nearLeft = x < EDGE_THRESHOLD;
   const nearRight = x > width - EDGE_THRESHOLD;
   const nearTop = y < EDGE_THRESHOLD;
   const nearBottom = y > height - EDGE_THRESHOLD;
-  
+
   // Corners
   if (nearTop && nearLeft) return 'nw';
   if (nearTop && nearRight) return 'ne';
   if (nearBottom && nearLeft) return 'sw';
   if (nearBottom && nearRight) return 'se';
-  
+
   // Edges
   if (nearTop) return 'n';
   if (nearBottom) return 's';
   if (nearLeft) return 'w';
   if (nearRight) return 'e';
-  
+
   return null;
 }
 
 // Get cursor style for resize edge
 function getResizeCursor(edge) {
   const cursors = {
-    'n': 'ns-resize',
-    's': 'ns-resize',
-    'e': 'ew-resize',
-    'w': 'ew-resize',
-    'ne': 'nesw-resize',
-    'sw': 'nesw-resize',
-    'nw': 'nwse-resize',
-    'se': 'nwse-resize'
+    n: 'ns-resize',
+    s: 'ns-resize',
+    e: 'ew-resize',
+    w: 'ew-resize',
+    ne: 'nesw-resize',
+    sw: 'nesw-resize',
+    nw: 'nwse-resize',
+    se: 'nwse-resize',
   };
   return cursors[edge] || 'grab';
 }
@@ -246,12 +251,12 @@ function handleMouseMove(e) {
   if (isResizing) {
     const deltaX = e.screenX - resizeStartX;
     const deltaY = e.screenY - resizeStartY;
-    
+
     let newWidth = resizeStartWidth;
     let newHeight = resizeStartHeight;
     let totalMoveX = 0;
     let totalMoveY = 0;
-    
+
     // Calculate new dimensions based on which edge is being dragged
     if (resizeEdge.includes('e')) {
       newWidth = resizeStartWidth + deltaX;
@@ -265,11 +270,11 @@ function handleMouseMove(e) {
     if (resizeEdge.includes('n')) {
       newHeight = resizeStartHeight - deltaY;
     }
-    
+
     // Constrain dimensions
     const constrainedWidth = Math.round(Math.max(MIN_SIZE, Math.min(MAX_SIZE, newWidth)));
     const constrainedHeight = Math.round(Math.max(MIN_SIZE, Math.min(MAX_SIZE, newHeight)));
-    
+
     // Calculate window movement needed (for resizing from top/left)
     if (resizeEdge.includes('w')) {
       totalMoveX = resizeStartWidth - constrainedWidth;
@@ -277,37 +282,37 @@ function handleMouseMove(e) {
     if (resizeEdge.includes('n')) {
       totalMoveY = resizeStartHeight - constrainedHeight;
     }
-    
+
     // Only update if dimensions actually changed
     if (constrainedWidth !== bubbleWidth || constrainedHeight !== bubbleHeight) {
       // Calculate incremental move (difference from last move)
       const incrementalMoveX = totalMoveX - lastMoveX;
       const incrementalMoveY = totalMoveY - lastMoveY;
-      
+
       updateBubbleSizeNoPresetClear(constrainedWidth, constrainedHeight);
-      
+
       if (incrementalMoveX !== 0 || incrementalMoveY !== 0) {
         ipcRenderer.send('window-move', { x: incrementalMoveX, y: incrementalMoveY });
       }
-      
+
       lastMoveX = totalMoveX;
       lastMoveY = totalMoveY;
     }
-    
+
     return;
   }
-  
+
   if (isDragging) {
     const deltaX = e.screenX - dragStartX;
     const deltaY = e.screenY - dragStartY;
-    
+
     ipcRenderer.send('window-move', { x: deltaX, y: deltaY });
-    
+
     dragStartX = e.screenX;
     dragStartY = e.screenY;
     return;
   }
-  
+
   // Detect edge hover
   const edge = getResizeEdge(e);
   if (edge) {
@@ -321,9 +326,9 @@ function handleMouseMove(e) {
 
 function handleMouseDown(e) {
   if (e.button !== 0) return; // Only left click
-  
+
   const edge = getResizeEdge(e);
-  
+
   if (edge) {
     isResizing = true;
     resizeEdge = edge;
@@ -333,10 +338,10 @@ function handleMouseDown(e) {
     resizeStartHeight = bubbleHeight;
     lastMoveX = 0;
     lastMoveY = 0;
-    
+
     // Add visual feedback
     cameraContainer.classList.add('resizing');
-    
+
     e.preventDefault();
     e.stopPropagation();
   } else {
@@ -358,7 +363,7 @@ function handleMouseUp() {
     lastMoveY = 0;
     cameraContainer.classList.remove('resizing');
   }
-  
+
   if (isDragging) {
     isDragging = false;
     cameraContainer.style.cursor = 'grab';
@@ -383,7 +388,7 @@ retryCamera.addEventListener('click', () => {
 
 navigator.mediaDevices.addEventListener('devicechange', async () => {
   const devices = await navigator.mediaDevices.enumerateDevices();
-  availableCameras = devices.filter(device => device.kind === 'videoinput');
+  availableCameras = devices.filter((device) => device.kind === 'videoinput');
 });
 
 const BORDER_THEMES = ['silver', 'sunset', 'forest', 'ocean'];
@@ -450,8 +455,8 @@ document.addEventListener('contextmenu', (e) => {
     cameras: availableCameras.map((cam, i) => ({
       label: cam.label || `Camera ${i + 1}`,
       index: i,
-      active: i === currentCameraIndex
-    }))
+      active: i === currentCameraIndex,
+    })),
   });
 });
 
@@ -489,12 +494,12 @@ function enableCustomMode() {
 // Shape presets (override auto border-radius)
 function applyShapePreset(shape) {
   currentShapePreset = shape;
-  
+
   // Make it square for the shape to look right
   const size = Math.max(bubbleWidth, bubbleHeight);
   bubbleWidth = size;
   bubbleHeight = size;
-  
+
   let borderRadius;
   switch (shape) {
     case 'circle':
@@ -509,37 +514,37 @@ function applyShapePreset(shape) {
     default:
       borderRadius = calculateBorderRadius(bubbleWidth, bubbleHeight);
   }
-  
+
   cameraContainer.style.transition = 'width 0.2s ease, height 0.2s ease, border-radius 0.2s ease';
   cameraContainer.style.width = `${bubbleWidth}px`;
   cameraContainer.style.height = `${bubbleHeight}px`;
   cameraContainer.style.borderRadius = borderRadius;
-  
-  ipcRenderer.send('resize-window', { 
-    width: bubbleWidth + 20, 
-    height: bubbleHeight + 20 
+
+  ipcRenderer.send('resize-window', {
+    width: bubbleWidth + 20,
+    height: bubbleHeight + 20,
   });
 }
 
 // Size presets - maintains current proportions
 const SIZE_PRESETS = {
-  small: 150,  // Increased to avoid transparency issues
+  small: 150, // Increased to avoid transparency issues
   medium: 200,
-  large: 300
+  large: 300,
 };
 let currentSizePreset = 'medium';
 
 function applySizePreset(size) {
   const targetSize = SIZE_PRESETS[size] || 200;
   currentSizePreset = size;
-  
+
   // Scale proportionally based on the larger dimension
   const maxDimension = Math.max(bubbleWidth, bubbleHeight);
   const scale = targetSize / maxDimension;
-  
+
   const newWidth = Math.round(bubbleWidth * scale);
   const newHeight = Math.round(bubbleHeight * scale);
-  
+
   // Update size without clearing shape preset
   bubbleWidth = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newWidth));
   bubbleHeight = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newHeight));
@@ -559,7 +564,7 @@ function cycleSize() {
 function scaleProportionally(factor) {
   const newWidth = Math.round(bubbleWidth * factor);
   const newHeight = Math.round(bubbleHeight * factor);
-  
+
   bubbleWidth = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newWidth));
   bubbleHeight = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newHeight));
   applyBubbleStyles(true);

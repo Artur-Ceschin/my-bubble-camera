@@ -46,7 +46,7 @@ function createWindow(): void {
 function createTray(): void {
   const icon = nativeImage.createEmpty();
   tray = new Tray(icon);
-  
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show/Hide Camera',
@@ -58,7 +58,7 @@ function createTray(): void {
             mainWindow.show();
           }
         }
-      }
+      },
     },
     { type: 'separator' },
     {
@@ -68,13 +68,13 @@ function createTray(): void {
           resizeWindow(220, 220);
           mainWindow.webContents.send('sync-size', { width: 200, height: 200 });
         }
-      }
+      },
     },
     { type: 'separator' },
     {
       label: 'Quit',
-      click: () => app.quit()
-    }
+      click: () => app.quit(),
+    },
   ]);
 
   tray.setToolTip('Camera Bubble');
@@ -127,12 +127,12 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
     checked: cam.active,
     click: () => {
       mainWindow?.webContents.send('menu-action', { type: 'camera', value: cam.index });
-    }
+    },
   }));
 
   // Determine current shape mode for checkmarks
   const isCustomMode = data.isCustomMode;
-  
+
   const template = [
     {
       label: 'Shape',
@@ -141,45 +141,51 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
           label: 'Circle',
           type: 'radio' as const,
           checked: !isCustomMode && data.currentShape === 'circle',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'circle' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'circle' }),
         },
         {
           label: 'Rounded',
           type: 'radio' as const,
           checked: !isCustomMode && data.currentShape === 'rounded',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'rounded' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'rounded' }),
         },
         {
           label: 'Rectangle',
           type: 'radio' as const,
           checked: !isCustomMode && data.currentShape === 'rectangle',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'rectangle' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'rectangle' }),
         },
         { type: 'separator' as const },
         {
           label: 'Custom (drag edges to reshape)',
           type: 'radio' as const,
           checked: isCustomMode,
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'custom-mode' })
-        }
-      ]
+          click: () => mainWindow?.webContents.send('menu-action', { type: 'custom-mode' }),
+        },
+      ],
     },
     {
       label: 'Size',
       submenu: [
         {
           label: 'Small',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'small' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'size', value: 'small' }),
         },
         {
           label: 'Medium',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'medium' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'size', value: 'medium' }),
         },
         {
           label: 'Large',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'large' })
-        }
-      ]
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'size', value: 'large' }),
+        },
+      ],
     },
     {
       label: 'Border',
@@ -188,42 +194,47 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
           label: 'Smoke',
           type: 'radio' as const,
           checked: data.currentBorderTheme === 'silver',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'silver' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'border', value: 'silver' }),
         },
         {
           label: 'Ember',
           type: 'radio' as const,
           checked: data.currentBorderTheme === 'sunset',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'sunset' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'border', value: 'sunset' }),
         },
         {
           label: 'Pine',
           type: 'radio' as const,
           checked: data.currentBorderTheme === 'forest',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'forest' })
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'border', value: 'forest' }),
         },
         {
           label: 'Midnight',
           type: 'radio' as const,
           checked: data.currentBorderTheme === 'ocean',
-          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'ocean' })
-        }
-      ]
+          click: () =>
+            mainWindow?.webContents.send('menu-action', { type: 'border', value: 'ocean' }),
+        },
+      ],
     },
     { type: 'separator' as const },
     {
       label: 'Camera',
-      submenu: cameraSubmenu.length > 0 ? cameraSubmenu : [{ label: 'No cameras found', enabled: false }]
+      submenu:
+        cameraSubmenu.length > 0 ? cameraSubmenu : [{ label: 'No cameras found', enabled: false }],
     },
     {
       label: data.isMirrored ? '✓ Mirror' : 'Mirror',
-      click: () => mainWindow?.webContents.send('menu-action', { type: 'mirror' })
+      click: () => mainWindow?.webContents.send('menu-action', { type: 'mirror' }),
     },
     { type: 'separator' as const },
     {
       label: 'Quit',
-      click: () => app.quit()
-    }
+      click: () => app.quit(),
+    },
   ];
 
   const menu = Menu.buildFromTemplate(template);
