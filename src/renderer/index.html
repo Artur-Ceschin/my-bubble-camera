@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' blob:;">
+  <title>Camera Bubble</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Camera Container -->
+    <div id="camera-container" class="shape-circle">
+      <video id="camera-feed" autoplay muted playsinline></video>
+      
+      <!-- Overlay for dragging -->
+      <div id="drag-overlay"></div>
+    </div>
+    
+    <!-- No Camera Message -->
+    <div id="no-camera" class="hidden">
+      <p>📷 No camera found</p>
+      <button id="retry-camera">Retry</button>
+    </div>
+  </div>
+  
+  <script src="renderer.js"></script>
+</body>
+</html>
+

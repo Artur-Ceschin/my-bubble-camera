@@ -1,0 +1,165 @@
+/* CSS Variables */
+:root {
+  --bubble-size: 200px;
+  --border-color: rgba(255, 255, 255, 0.3);
+  --border-glow: rgba(120, 200, 255, 0.5);
+  --control-bg: rgba(20, 20, 30, 0.85);
+  --control-hover: rgba(60, 60, 80, 0.9);
+  --accent-color: #4fc3f7;
+  --transition-speed: 0.25s;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, sans-serif;
+  user-select: none;
+  -webkit-app-region: no-drag;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+}
+
+/* Camera Container */
+#camera-container {
+  position: relative;
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  overflow: hidden;
+  cursor: grab;
+  transition: border-radius var(--transition-speed) ease, border-color 0.2s ease;
+
+  /* Clean border */
+  border: 3px solid var(--border-color);
+}
+
+#camera-container:hover {
+  border-color: var(--border-glow);
+}
+
+#camera-container:active {
+  cursor: grabbing;
+}
+
+/* Shape variants */
+#camera-container.shape-circle {
+  border-radius: 50%;
+}
+
+#camera-container.shape-rounded {
+  border-radius: 20px;
+}
+
+#camera-container.shape-rectangle {
+  border-radius: 8px;
+}
+
+/* Video Feed */
+#camera-feed {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror by default */
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+#camera-feed.no-mirror {
+  transform: scaleX(1);
+}
+
+/* Drag Overlay */
+#drag-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  -webkit-app-region: drag;
+}
+
+/* No Camera Message */
+#no-camera {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  background: var(--control-bg);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#no-camera p {
+  color: white;
+  font-size: 14px;
+}
+
+#no-camera button {
+  padding: 8px 20px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.15s ease;
+}
+
+#no-camera button:hover {
+  background: #29b6f6;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Size variations */
+.size-small {
+  --bubble-size: 150px;
+}
+
+.size-medium {
+  --bubble-size: 200px;
+}
+
+.size-large {
+  --bubble-size: 300px;
+}
+
+/* Animation for shape change */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+#camera-container.shape-changing {
+  animation: pulse 0.3s ease;
+}
