@@ -55,7 +55,19 @@ chmod +x My-Bubble-Camera-1.0.0-linux-x64.AppImage
 ./My-Bubble-Camera-1.0.0-linux-x64.AppImage
 ```
 
-> **Note**: On macOS, you may need to right-click → Open the first time to bypass Gatekeeper.
+### macOS Installation Note
+
+Since this app isn't signed with an Apple Developer certificate, macOS may show **"App is damaged"** error. To fix this:
+
+```bash
+# Remove the quarantine attribute (run in Terminal)
+xattr -cr /Applications/My\ Bubble\ Camera.app
+
+# Or if still in Downloads folder:
+xattr -cr ~/Downloads/My\ Bubble\ Camera.app
+```
+
+Then open the app normally. You only need to do this once.
 
 ## 🚀 Getting Started (Development)
 
