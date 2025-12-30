@@ -4,60 +4,46 @@ import * as path from 'path';
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
 
-// Window size options (just slightly larger than bubble)
-const SIZES = {
-  small: { width: 160, height: 160 },
-  medium: { width: 210, height: 210 },
-  large: { width: 310, height: 310 }
-};
-
-let currentSize: keyof typeof SIZES = 'medium';
+// Default bubble size
+let currentWidth = 220;
+let currentHeight = 220;
 
 function createWindow(): void {
   const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
-  const size = SIZES[currentSize];
 
   mainWindow = new BrowserWindow({
-    width: size.width,
-    height: size.height,
-    x: screenWidth - size.width - 50,
-    y: screenHeight - size.height - 50,
+    width: currentWidth,
+    height: currentHeight,
+    x: screenWidth - currentWidth - 50,
+    y: screenHeight - currentHeight - 50,
     frame: false,
     transparent: true,
     alwaysOnTop: true,
     resizable: false,
     skipTaskbar: true,
     hasShadow: false,
-    backgroundColor: '#00000000',
-    roundedCorners: false,
-    titleBarStyle: 'customButtonsOnHover',
-    trafficLightPosition: { x: -100, y: -100 }, // Hide traffic lights
+    vibrancy: undefined, // Disable vibrancy for true transparency
+    visualEffectState: 'active',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
 
-  // Set the window to be visible on all workspaces/desktops
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  
-  // Ensure no shadow on macOS
   mainWindow.setHasShadow(false);
-  
-  // Allow clicking through transparent areas (optional - can be toggled)
   mainWindow.setIgnoreMouseEvents(false);
+  mainWindow.setBackgroundColor('#00000000');
+  mainWindow.setMinimumSize(50, 50); // Allow very small windows
 
-  // Load the HTML file
   mainWindow.loadFile(path.join(__dirname, '../../src/renderer/index.html'));
 
-  // Handle window closed
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
 function createTray(): void {
-  // Create a simple tray icon (you can replace with a proper icon)
   const icon = nativeImage.createEmpty();
   tray = new Tray(icon);
   
@@ -76,34 +62,18 @@ function createTray(): void {
     },
     { type: 'separator' },
     {
-      label: 'Size',
-      submenu: [
-        {
-          label: 'Small',
-          type: 'radio',
-          checked: currentSize === 'small',
-          click: () => resizeWindow('small')
-        },
-        {
-          label: 'Medium',
-          type: 'radio',
-          checked: currentSize === 'medium',
-          click: () => resizeWindow('medium')
-        },
-        {
-          label: 'Large',
-          type: 'radio',
-          checked: currentSize === 'large',
-          click: () => resizeWindow('large')
+      label: 'Reset to Circle',
+      click: () => {
+        if (mainWindow) {
+          resizeWindow(220, 220);
+          mainWindow.webContents.send('sync-size', { width: 200, height: 200 });
         }
-      ]
+      }
     },
     { type: 'separator' },
     {
       label: 'Quit',
-      click: () => {
-        app.quit();
-      }
+      click: () => app.quit()
     }
   ]);
 
@@ -111,38 +81,39 @@ function createTray(): void {
   tray.setContextMenu(contextMenu);
 }
 
-function resizeWindow(size: keyof typeof SIZES): void {
-  if (mainWindow) {
-    currentSize = size;
-    const newSize = SIZES[size];
-    mainWindow.setSize(newSize.width, newSize.height);
-    mainWindow.webContents.send('size-changed', size);
+function resizeWindow(width: number, height: number): void {
+  if (mainWindow && width && height && !isNaN(width) && !isNaN(height)) {
+    // Ensure integers and minimum size
+    const w = Math.max(50, Math.round(width));
+    const h = Math.max(50, Math.round(height));
+    currentWidth = w;
+    currentHeight = h;
+    mainWindow.setSize(w, h);
+    // Ensure transparency after resize
+    mainWindow.setBackgroundColor('#00000000');
   }
 }
 
-// IPC handlers for window dragging
+// IPC: Move window by delta
 ipcMain.on('window-move', (_, { x, y }: { x: number; y: number }) => {
-  if (mainWindow) {
+  if (mainWindow && typeof x === 'number' && typeof y === 'number' && !isNaN(x) && !isNaN(y)) {
     const [currentX, currentY] = mainWindow.getPosition();
-    mainWindow.setPosition(currentX + x, currentY + y);
+    mainWindow.setPosition(currentX + Math.round(x), currentY + Math.round(y));
   }
 });
 
-ipcMain.on('set-size', (_, size: keyof typeof SIZES) => {
-  resizeWindow(size);
-});
-
-ipcMain.on('toggle-click-through', (_, enabled: boolean) => {
-  if (mainWindow) {
-    mainWindow.setIgnoreMouseEvents(enabled, { forward: true });
-  }
+// IPC: Resize window
+ipcMain.on('resize-window', (_, { width, height }: { width: number; height: number }) => {
+  resizeWindow(width, height);
 });
 
 // Context menu handler
 interface ContextMenuData {
-  currentShape: string;
-  currentSize: string;
+  bubbleWidth: number;
+  bubbleHeight: number;
   isMirrored: boolean;
+  isCustomMode: boolean;
+  currentShape: string;
   cameras: Array<{ label: string; index: number; active: boolean }>;
 }
 
@@ -158,6 +129,9 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
     }
   }));
 
+  // Determine current shape mode for checkmarks
+  const isCustomMode = data.isCustomMode;
+  
   const template = [
     {
       label: 'Shape',
@@ -165,20 +139,27 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
         {
           label: 'Circle',
           type: 'radio' as const,
-          checked: data.currentShape === 'circle',
+          checked: !isCustomMode && data.currentShape === 'circle',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'circle' })
         },
         {
           label: 'Rounded',
           type: 'radio' as const,
-          checked: data.currentShape === 'rounded',
+          checked: !isCustomMode && data.currentShape === 'rounded',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'rounded' })
         },
         {
           label: 'Rectangle',
           type: 'radio' as const,
-          checked: data.currentShape === 'rectangle',
+          checked: !isCustomMode && data.currentShape === 'rectangle',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'shape', value: 'rectangle' })
+        },
+        { type: 'separator' as const },
+        {
+          label: 'Custom (drag edges to reshape)',
+          type: 'radio' as const,
+          checked: isCustomMode,
+          click: () => mainWindow?.webContents.send('menu-action', { type: 'custom-mode' })
         }
       ]
     },
@@ -187,20 +168,14 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
       submenu: [
         {
           label: 'Small',
-          type: 'radio' as const,
-          checked: data.currentSize === 'small',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'small' })
         },
         {
           label: 'Medium',
-          type: 'radio' as const,
-          checked: data.currentSize === 'medium',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'medium' })
         },
         {
           label: 'Large',
-          type: 'radio' as const,
-          checked: data.currentSize === 'large',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'large' })
         }
       ]
@@ -237,10 +212,8 @@ app.whenReady().then(() => {
   });
 });
 
-// Quit when all windows are closed (except on macOS)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
-

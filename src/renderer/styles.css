@@ -1,12 +1,9 @@
 /* CSS Variables */
 :root {
-  --bubble-size: 200px;
   --border-color: rgba(255, 255, 255, 0.3);
-  --border-glow: rgba(120, 200, 255, 0.5);
+  --border-glow: rgba(120, 200, 255, 0.6);
   --control-bg: rgba(20, 20, 30, 0.85);
-  --control-hover: rgba(60, 60, 80, 0.9);
   --accent-color: #4fc3f7;
-  --transition-speed: 0.25s;
 }
 
 /* Reset */
@@ -14,6 +11,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background: transparent;
 }
 
 html,
@@ -21,11 +19,12 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, sans-serif;
   user-select: none;
-  -webkit-app-region: no-drag;
+  -webkit-user-select: none;
 }
 
 #app {
@@ -34,41 +33,29 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
-/* Camera Container */
+/* Camera Container - Fluid sizing */
 #camera-container {
   position: relative;
-  width: var(--bubble-size);
-  height: var(--bubble-size);
+  width: 200px;
+  height: 200px;
   overflow: hidden;
   cursor: grab;
-  transition: border-radius var(--transition-speed) ease, border-color 0.2s ease;
+  background: transparent;
 
-  /* Clean border */
+  /* Border with glow on hover */
   border: 3px solid var(--border-color);
+  border-radius: 50%;
+
+  /* Smooth transitions for programmatic changes */
+  transition: border-color 0.2s ease;
 }
 
 #camera-container:hover {
   border-color: var(--border-glow);
-}
-
-#camera-container:active {
-  cursor: grabbing;
-}
-
-/* Shape variants */
-#camera-container.shape-circle {
-  border-radius: 50%;
-}
-
-#camera-container.shape-rounded {
-  border-radius: 20px;
-}
-
-#camera-container.shape-rectangle {
-  border-radius: 8px;
 }
 
 /* Video Feed */
@@ -76,15 +63,16 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1); /* Mirror by default */
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  transform: scaleX(-1);
+  background: transparent;
+  pointer-events: none;
 }
 
 #camera-feed.no-mirror {
   transform: scaleX(1);
 }
 
-/* Drag Overlay */
+/* Drag/Resize Overlay */
 #drag-overlay {
   position: absolute;
   top: 0;
@@ -92,7 +80,8 @@ body {
   width: 100%;
   height: 100%;
   z-index: 10;
-  -webkit-app-region: drag;
+  cursor: grab;
+  background: transparent;
 }
 
 /* No Camera Message */
@@ -134,32 +123,7 @@ body {
   display: none !important;
 }
 
-/* Size variations */
-.size-small {
-  --bubble-size: 150px;
-}
-
-.size-medium {
-  --bubble-size: 200px;
-}
-
-.size-large {
-  --bubble-size: 300px;
-}
-
-/* Animation for shape change */
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.02);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-#camera-container.shape-changing {
-  animation: pulse 0.3s ease;
+/* Resize visual feedback */
+#camera-container.resizing {
+  border-color: var(--accent-color) !important;
 }
