@@ -22,7 +22,7 @@ function createWindow(): void {
     resizable: false,
     skipTaskbar: true,
     hasShadow: false,
-    vibrancy: undefined, // Disable vibrancy for true transparency
+    vibrancy: undefined,
     visualEffectState: 'active',
     webPreferences: {
       nodeIntegration: true,
@@ -114,6 +114,7 @@ interface ContextMenuData {
   isMirrored: boolean;
   isCustomMode: boolean;
   currentShape: string;
+  currentBorderTheme: string;
   cameras: Array<{ label: string; index: number; active: boolean }>;
 }
 
@@ -177,6 +178,35 @@ ipcMain.on('show-context-menu', (_, data: ContextMenuData) => {
         {
           label: 'Large',
           click: () => mainWindow?.webContents.send('menu-action', { type: 'size', value: 'large' })
+        }
+      ]
+    },
+    {
+      label: 'Border',
+      submenu: [
+        {
+          label: 'Smoke',
+          type: 'radio' as const,
+          checked: data.currentBorderTheme === 'silver',
+          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'silver' })
+        },
+        {
+          label: 'Ember',
+          type: 'radio' as const,
+          checked: data.currentBorderTheme === 'sunset',
+          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'sunset' })
+        },
+        {
+          label: 'Pine',
+          type: 'radio' as const,
+          checked: data.currentBorderTheme === 'forest',
+          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'forest' })
+        },
+        {
+          label: 'Midnight',
+          type: 'radio' as const,
+          checked: data.currentBorderTheme === 'ocean',
+          click: () => mainWindow?.webContents.send('menu-action', { type: 'border', value: 'ocean' })
         }
       ]
     },

@@ -12,6 +12,7 @@ let isMirrored = true;
 let mediaStream = null;
 let availableCameras = [];
 let currentCameraIndex = 0;
+let currentBorderTheme = 'silver'; // silver, sunset, forest, ocean
 
 // Bubble dimensions (fluid sizing)
 let bubbleWidth = 200;
@@ -108,21 +109,26 @@ function toggleMirror() {
   cameraFeed.classList.toggle('no-mirror', !isMirrored);
 }
 
+// Change border theme
+function setBorderTheme(theme) {
+  // Remove all theme classes
+  document.body.classList.remove('border-silver', 'border-sunset', 'border-forest', 'border-ocean');
+  // Add new theme class
+  document.body.classList.add(`border-${theme}`);
+  currentBorderTheme = theme;
+}
+
 // ============ FLUID RESIZE SYSTEM ============
 
 // Calculate border-radius based on aspect ratio
 function calculateBorderRadius(width, height) {
   const aspectRatio = width / height;
-  const minDimension = Math.min(width, height);
   
-  // How "square" is the shape? (1.0 = perfect square, further from 1.0 = more rectangular)
   const squareness = 1 - Math.abs(1 - aspectRatio) * 0.5;
   
-  // Max radius is 50% (full circle/oval), min is ~5% (slight rounding)
   const maxRadiusPercent = 50;
   const minRadiusPercent = 5;
   
-  // Interpolate based on squareness
   const radiusPercent = minRadiusPercent + (maxRadiusPercent - minRadiusPercent) * squareness;
   
   return `${radiusPercent}%`;
@@ -145,7 +151,6 @@ function updateBubbleSizeNoPresetClear(width, height) {
   bubbleWidth = width;
   bubbleHeight = height;
   
-  // If in custom mode, use auto border-radius
   if (currentShapePreset === null) {
     const borderRadius = calculateBorderRadius(bubbleWidth, bubbleHeight);
     cameraContainer.style.borderRadius = borderRadius;
@@ -195,7 +200,6 @@ function getBorderRadiusForPreset(preset) {
   }
 }
 
-// Detect which edge the mouse is near
 function getResizeEdge(e) {
   const rect = cameraContainer.getBoundingClientRect();
   const x = e.clientX - rect.left;
@@ -238,7 +242,6 @@ function getResizeCursor(edge) {
   return cursors[edge] || 'grab';
 }
 
-// Handle mouse move for edge detection and resizing
 function handleMouseMove(e) {
   if (isResizing) {
     const deltaX = e.screenX - resizeStartX;
@@ -281,10 +284,8 @@ function handleMouseMove(e) {
       const incrementalMoveX = totalMoveX - lastMoveX;
       const incrementalMoveY = totalMoveY - lastMoveY;
       
-      // Update bubble size (this also sends resize-window)
       updateBubbleSizeNoPresetClear(constrainedWidth, constrainedHeight);
       
-      // Move window incrementally if resizing from top or left
       if (incrementalMoveX !== 0 || incrementalMoveY !== 0) {
         ipcRenderer.send('window-move', { x: incrementalMoveX, y: incrementalMoveY });
       }
@@ -318,14 +319,12 @@ function handleMouseMove(e) {
   }
 }
 
-// Handle mouse down
 function handleMouseDown(e) {
   if (e.button !== 0) return; // Only left click
   
   const edge = getResizeEdge(e);
   
   if (edge) {
-    // Start resizing
     isResizing = true;
     resizeEdge = edge;
     resizeStartX = e.screenX;
@@ -387,6 +386,8 @@ navigator.mediaDevices.addEventListener('devicechange', async () => {
   availableCameras = devices.filter(device => device.kind === 'videoinput');
 });
 
+const BORDER_THEMES = ['silver', 'sunset', 'forest', 'ocean'];
+
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   switch (e.key.toLowerCase()) {
@@ -406,6 +407,10 @@ document.addEventListener('keydown', (e) => {
     case 's':
       // Cycle through sizes (proportionally)
       cycleSize();
+      break;
+    case 'b':
+      // Cycle through border themes
+      cycleBorderTheme();
       break;
     case 'm':
       toggleMirror();
@@ -427,7 +432,12 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Right-click context menu
+function cycleBorderTheme() {
+  const currentIndex = BORDER_THEMES.indexOf(currentBorderTheme);
+  const nextIndex = (currentIndex + 1) % BORDER_THEMES.length;
+  setBorderTheme(BORDER_THEMES[nextIndex]);
+}
+
 document.addEventListener('contextmenu', (e) => {
   e.preventDefault();
   ipcRenderer.send('show-context-menu', {
@@ -436,6 +446,7 @@ document.addEventListener('contextmenu', (e) => {
     isMirrored,
     isCustomMode: currentShapePreset === null,
     currentShape: currentShapePreset || 'custom',
+    currentBorderTheme,
     cameras: availableCameras.map((cam, i) => ({
       label: cam.label || `Camera ${i + 1}`,
       index: i,
@@ -462,13 +473,14 @@ ipcRenderer.on('menu-action', (_, action) => {
     case 'custom-mode':
       enableCustomMode();
       break;
+    case 'border':
+      setBorderTheme(action.value);
+      break;
   }
 });
 
-// Enable custom mode (fluid resize with auto border-radius)
 function enableCustomMode() {
   currentShapePreset = null;
-  // Recalculate border radius based on current dimensions
   const borderRadius = calculateBorderRadius(bubbleWidth, bubbleHeight);
   cameraContainer.style.transition = 'border-radius 0.2s ease';
   cameraContainer.style.borderRadius = borderRadius;
@@ -548,23 +560,21 @@ function scaleProportionally(factor) {
   const newWidth = Math.round(bubbleWidth * factor);
   const newHeight = Math.round(bubbleHeight * factor);
   
-  // Update size without clearing shape preset
   bubbleWidth = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newWidth));
   bubbleHeight = Math.max(MIN_SIZE, Math.min(MAX_SIZE, newHeight));
   applyBubbleStyles(true);
 }
 
-// Listen for size sync from main process
 ipcRenderer.on('sync-size', (_, { width, height }) => {
   bubbleWidth = width;
   bubbleHeight = height;
   updateBubbleSize(width, height, false);
 });
 
-// Initialize
 document.addEventListener('DOMContentLoaded', () => {
   initCamera();
   updateBubbleSize(bubbleWidth, bubbleHeight, false);
+  setBorderTheme(currentBorderTheme);
 });
 
 document.addEventListener('visibilitychange', () => {
